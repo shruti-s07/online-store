@@ -1,0 +1,40 @@
+# Environment & Secrets
+.env
+*.env
+
+# Duplicate subfolder anomaly
+/online_store/
+
+# Python & Virtual Environments
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+
+# Testing & Linting
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# Runtime Generated Media & Uploads
+/media/
+
+# AI Generated Artifacts & Training Outputs
+/ai/models/*.joblib
+/ai/models/*_meta.json
+/ai/data/*.csv
+# (Optional: keep ai/models/REPORT.md if you want the markdown benchmark in Git)
+
+# Operating System files
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*~
