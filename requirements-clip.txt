@@ -1,0 +1,5 @@
+# Optional: enables the pretrained CLIP model for SnapCheck / photo search.
+# Needs network access to the Hugging Face hub on first run (weights are cached afterwards).
+-r requirements.txt
+torch>=2.3
+open_clip_torch>=2.26
