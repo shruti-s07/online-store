@@ -1,0 +1,369 @@
+# Training templates for the local intent classifier (used when no LLM key is set).
+# {placeholders} are filled from `fillers` (and catalogue nouns/categories) by ai/train_intents.py.
+# Each intent maps to exactly one whitelisted tool; `channel` limits where it is offered.
+fillers:
+  n:
+  - '3'
+  - '5'
+  - '7'
+  - '10'
+  - '14'
+  - '30'
+  - '90'
+  order_id:
+  - '12'
+  - '345'
+  - '1024'
+  - '7781'
+  - '42'
+  price:
+  - '499'
+  - '999'
+  - '1500'
+  - '2000'
+  - '5000'
+  - '15000'
+  qty:
+  - '1'
+  - '2'
+  - '3'
+  - two
+  - a couple of
+  period:
+  - day
+  - week
+  - month
+  time:
+  - today
+  - this week
+  - this month
+  - last month
+  - this year
+  - last 7 days
+  - last 30 days
+  - last quarter
+time_phrases:
+  today: 1
+  yesterday: 2
+  this week: 7
+  last week: 14
+  this month: 30
+  last month: 60
+  this quarter: 90
+  last quarter: 180
+  this year: 365
+  last year: 730
+intents:
+  search_products:
+    channel: assistant
+    tool: search_products
+    templates:
+    - show me {noun}
+    - find {noun} under {price} rupees
+    - '{noun} under rs {price}'
+    - do you have any {noun}
+    - i am looking for a {noun}
+    - search for {category} products
+    - any cheap {noun} available
+    - what {category} items do you sell
+    - i need a new {noun}
+    - looking for {noun} below {price}
+    - find me something in {category}
+    - can you find {noun} for me
+    - i want to see {category} options
+    - browse {noun}
+    - show {category} products under {price}
+    - is there a {noun} in stock
+    - list {noun} you have
+  recommend:
+    channel: assistant
+    tool: get_recommendations
+    templates:
+    - what do you recommend
+    - suggest something for me
+    - any recommendations
+    - what should i buy next
+    - recommend me a product
+    - show me things i might like
+    - give me some ideas
+    - what would suit me
+    - what is good for me
+    - pick something for me
+    - anything you would suggest
+    - what goes well with my last order
+    - surprise me with a product
+    - which product should i get
+    - help me choose something
+  view_cart:
+    channel: assistant
+    tool: view_cart
+    templates:
+    - what is in my cart
+    - show my cart
+    - how much is my cart total
+    - show my basket
+    - what did i add to my cart
+    - cart please
+    - check my shopping bag
+    - how many items are in my cart
+    - what is my cart subtotal
+    - open my cart
+    - review my basket
+    - list the items in my bag
+    - what am i about to buy
+  add_to_cart:
+    channel: assistant
+    tool: add_to_cart
+    templates:
+    - add {noun} to my cart
+    - put {qty} {noun} in my basket
+    - i want to buy the {noun}
+    - add {qty} of the {noun}
+    - buy {noun}
+    - add this {noun} to cart
+    - please add {qty} {noun} to my bag
+    - i will take {qty} {noun}
+    - get me the {noun}
+    - order {qty} {noun} for me
+    - add {noun} please
+    - throw a {noun} in my cart
+    - i would like {qty} {noun}
+  remove_from_cart:
+    channel: assistant
+    tool: remove_from_cart
+    templates:
+    - remove {noun} from my cart
+    - delete the {noun} from my basket
+    - take the {noun} out of my cart
+    - i do not want the {noun} anymore
+    - drop the {noun} from my cart
+    - get rid of the {noun} in my basket
+    - remove {qty} {noun}
+    - clear the {noun} from my bag
+    - no {noun} in my cart please
+    - undo adding the {noun}
+  order_status:
+    channel: assistant
+    tool: order_status
+    templates:
+    - where is my order
+    - status of order {order_id}
+    - track my order {order_id}
+    - has my order shipped
+    - when will order {order_id} arrive
+    - show my recent orders
+    - what happened to my last order
+    - is my package on the way
+    - when does my order arrive
+    - what is the status of my purchase
+    - did order {order_id} ship yet
+    - check my delivery
+    - show me my order history
+  cancel_order:
+    channel: assistant
+    tool: cancel_order
+    templates:
+    - cancel order {order_id}
+    - i want to cancel my order
+    - please cancel order number {order_id}
+    - stop my order {order_id}
+    - cancel my last order
+    - i changed my mind cancel order {order_id}
+    - please stop order {order_id} from shipping
+    - call off my order
+    - i no longer want order {order_id}
+    - cancel my purchase
+  help:
+    channel: both
+    tool: null
+    templates:
+    - hello
+    - hi there
+    - what can you do
+    - help
+    - how does this work
+    - who are you
+    - hey
+    - good morning
+    - what are your features
+    - can you help me
+    - what should i ask you
+    - how can you help
+  revenue_summary:
+    channel: analytics
+    tool: revenue_summary
+    templates:
+    - what was revenue {time}
+    - total sales {time}
+    - how much did we make in the last {n} days
+    - average order value {time}
+    - how many units did we sell {time}
+    - give me a revenue summary
+    - what are our earnings {time}
+    - how much revenue {time}
+    - what did we earn {time}
+    - total income {time}
+    - sales total for the last {n} days
+    - what is the aov {time}
+    - overall revenue numbers
+  sales_by_period:
+    channel: analytics
+    tool: sales_by_period
+    templates:
+    - sales per {period} for the last {n} days
+    - show the {period}ly sales trend
+    - revenue by {period}
+    - plot daily sales {time}
+    - how are sales trending {time}
+    - sales over time
+    - chart revenue per {period}
+    - daily revenue for the last {n} days
+    - show sales by {period}
+    - revenue trend {time}
+    - how did sales change each {period}
+    - plot orders per {period}
+    - sales timeline {time}
+  sales_by_category:
+    channel: analytics
+    tool: sales_by_category
+    templates:
+    - which category sold the most {time}
+    - sales by category
+    - revenue per category in the last {n} days
+    - compare categories {time}
+    - category breakdown of sales
+    - what is the margin by category
+    - revenue split by category
+    - which categories perform best {time}
+    - category sales {time}
+    - how much did {category} sell {time}
+    - margin per category {time}
+    - compare category revenue
+  top_products:
+    channel: analytics
+    tool: top_products
+    templates:
+    - top {n} products {time}
+    - best sellers in {category}
+    - what are the best selling products
+    - most popular items {time}
+    - which products sell best in {category}
+    - show the top sellers
+    - which items sold the most {time}
+    - top selling {category} products
+    - best performers {time}
+    - most sold products in the last {n} days
+    - rank products by revenue
+    - leading products {time}
+  low_stock:
+    channel: analytics
+    tool: low_stock
+    templates:
+    - what is running low
+    - low stock products
+    - items below {n} units
+    - which products need restocking
+    - show stock that is almost out
+    - what is out of stock
+    - which items are nearly sold out
+    - stock alerts
+    - what should we reorder
+    - products with less than {n} in stock
+    - show the low inventory list
+    - anything close to running out
+  order_status_counts:
+    channel: analytics
+    tool: order_status_counts
+    templates:
+    - how many orders are on hold
+    - orders by status {time}
+    - how many orders were cancelled {time}
+    - count orders per status
+    - how many orders are pending
+    - order pipeline overview
+    - how many orders were shipped {time}
+    - order counts by status
+    - number of pending orders
+    - how many refused deliveries {time}
+    - status breakdown of orders {time}
+    - how many orders need review
+  customer_report:
+    channel: analytics
+    tool: customer_report
+    templates:
+    - who are our best customers
+    - top {n} customers {time}
+    - which customers spent the most
+    - biggest customers by revenue
+    - show the most valuable customers
+    - highest spending customers {time}
+    - list the top buyers
+    - who buys the most
+    - customers ranked by spend
+    - our most loyal big buyers {time}
+    - best clients by revenue
+  segment_summary:
+    channel: analytics
+    tool: segment_summary
+    templates:
+    - customer segments
+    - how many at risk customers do we have
+    - show loyal customers count
+    - segment breakdown
+    - how many new customers
+    - rfm segments overview
+    - how are customers segmented
+    - show the customer groups
+    - how many big spenders
+    - size of each customer segment
+    - how many loyal customers do we have
+    - which segment is at risk
+baseline_keywords:
+  cancel_order:
+  - cancel
+  remove_from_cart:
+  - remove
+  - delete
+  add_to_cart:
+  - add
+  - buy
+  view_cart:
+  - cart
+  - basket
+  order_status:
+  - order
+  - track
+  recommend:
+  - recommend
+  - suggest
+  low_stock:
+  - stock
+  - low
+  segment_summary:
+  - segment
+  customer_report:
+  - customers
+  sales_by_category:
+  - category
+  sales_by_period:
+  - trend
+  - per
+  - daily
+  top_products:
+  - top
+  - best
+  order_status_counts:
+  - status
+  - many orders
+  revenue_summary:
+  - revenue
+  - sales
+  - earn
+  search_products:
+  - find
+  - show
+  - looking
+  help:
+  - hello
+  - hi
+  - help

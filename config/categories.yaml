@@ -1,0 +1,122 @@
+# Product taxonomy for the Indian storefront, used by the seed command and the synthetic data
+# generators. Brands are fictional. Prices are in INR (GST inclusive).
+# season: monthly demand multipliers Jan..Dec (Indian festive, wedding, summer and cricket seasons).
+# nouns: product types; icon = Material Design Icons glyph used to draw the catalogue image;
+#        price = typical Indian retail range in ₹ for that type (falls back to the category price_range).
+# aspects: words customers use in reviews (also the aspect lexicon for pros/cons).
+# blurb: one line added to every product description in the category.
+categories:
+  - name: Electronics
+    slug: electronics
+    blurb: "Comes with a 1 year manufacturer warranty."
+    brands: [Zentra, Voltix, Nimbus, Aurix]
+    nouns:
+      - {name: Smartphone, icon: cellphone, price: [7999, 34999]}
+      - {name: Wireless Earbuds, icon: earbuds, price: [999, 4999]}
+      - {name: Smartwatch, icon: watch, price: [1499, 9999]}
+      - {name: Power Bank, icon: battery-charging-high, price: [699, 2499]}
+      - {name: Bluetooth Speaker, icon: speaker, price: [999, 6999]}
+      - {name: Ceiling Fan, icon: ceiling-fan, price: [1499, 4999]}
+      - {name: Smart LED Bulb, icon: lightbulb-on-outline, price: [299, 999]}
+      - {name: Wi-Fi Router, icon: router-wireless, price: [999, 4999]}
+    adjectives: [Neo, Lite, Pro, Max, Air, Plus]
+    price_range: [499, 34999]
+    cost_ratio_range: [0.62, 0.80]
+    lead_time_days: [4, 12]
+    season: [0.90, 0.85, 0.90, 0.95, 1.00, 0.95, 0.95, 1.00, 1.05, 1.35, 1.40, 1.00]
+    aspects: [build quality, performance, design, value, packaging, warranty support]
+  - name: Fashion
+    slug: fashion
+    blurb: "Easy returns within 10 days of delivery."
+    brands: [Rangrez, Bunai, Taana, Desi Loom]
+    nouns:
+      - {name: Cotton Kurta, icon: tshirt-crew, price: [499, 1999]}
+      - {name: Silk Saree, icon: hanger, price: [1999, 7999]}
+      - {name: Anarkali Suit, icon: human-female, price: [1499, 5999]}
+      - {name: Nehru Jacket, icon: tshirt-v, price: [999, 3499]}
+      - {name: Formal Shoes, icon: shoe-formal, price: [1299, 4499]}
+      - {name: Sling Bag, icon: purse, price: [499, 1999]}
+      - {name: Sunglasses, icon: sunglasses, price: [399, 1999]}
+      - {name: Silver Necklace, icon: necklace, price: [999, 4999]}
+    adjectives: [Handloom, Block-Print, Embroidered, Festive, Classic, Everyday]
+    price_range: [399, 7999]
+    cost_ratio_range: [0.35, 0.55]
+    lead_time_days: [6, 18]
+    season: [1.10, 1.15, 0.95, 0.90, 0.85, 0.80, 0.85, 0.95, 1.05, 1.30, 1.35, 1.20]
+    aspects: [fit, fabric, stitching, colour, size, comfort]
+  - name: Home & Kitchen
+    slug: home-kitchen
+    blurb: "Suitable for gas stoves and everyday family use."
+    brands: [Rasoi Plus, Ghar Aangan, Tavaa, Steelcraft]
+    nouns:
+      - {name: Pressure Cooker, icon: pot-steam, price: [999, 3499]}
+      - {name: Mixer Grinder, icon: blender, price: [1999, 5999]}
+      - {name: Non-Stick Tawa, icon: pan, price: [399, 1299]}
+      - {name: Steel Tiffin Box, icon: food-takeout-box, price: [249, 999]}
+      - {name: Masala Dabba, icon: shaker, price: [299, 999]}
+      - {name: Water Purifier, icon: cup-water, price: [6999, 14999]}
+      - {name: Dinner Set, icon: silverware-fork-knife, price: [999, 3999]}
+      - {name: Electric Kettle, icon: kettle, price: [699, 1999]}
+    adjectives: [Stainless Steel, Hard-Anodised, Premium, Compact, Classic, Family-Size]
+    price_range: [249, 14999]
+    cost_ratio_range: [0.45, 0.65]
+    lead_time_days: [5, 15]
+    season: [0.95, 0.90, 0.95, 1.00, 1.00, 0.95, 0.95, 1.00, 1.05, 1.30, 1.30, 1.00]
+    aspects: [design, durability, cleaning, size, heating, finish]
+  - name: Beauty & Personal Care
+    slug: beauty
+    blurb: "Dermatologically tested. Check the ingredient list before use."
+    brands: [Vana, Kesar Veda, Neem Tree, Ojas]
+    nouns:
+      - {name: Kumkumadi Face Oil, icon: bottle-tonic, price: [399, 1499]}
+      - {name: Herbal Hair Oil, icon: bottle-tonic-outline, price: [149, 499]}
+      - {name: Neem Face Wash, icon: hand-wash, price: [99, 299]}
+      - {name: Sunscreen SPF 50, icon: white-balance-sunny, price: [249, 699]}
+      - {name: Kajal, icon: lipstick, price: [99, 349]}
+      - {name: Rose Water Toner, icon: spray-bottle, price: [149, 449]}
+      - {name: Attar Perfume, icon: bottle-tonic-plus, price: [299, 1999]}
+      - {name: Body Lotion, icon: lotion-outline, price: [149, 599]}
+    adjectives: [Ayurvedic, Natural, Gentle, Daily, Herbal, Organic]
+    price_range: [99, 1999]
+    cost_ratio_range: [0.25, 0.45]
+    lead_time_days: [3, 10]
+    season: [0.95, 1.00, 1.05, 1.15, 1.20, 1.10, 0.95, 0.95, 1.00, 1.15, 1.15, 1.00]
+    aspects: [fragrance, texture, packaging, results, skin feel, value]
+  - name: Sports & Fitness
+    slug: sports-fitness
+    blurb: "Built for regular practice and training."
+    brands: [Khel, Paidal, Shakti Sports, Vega Fit]
+    nouns:
+      - {name: Cricket Bat, icon: cricket, price: [999, 6999]}
+      - {name: Yoga Mat, icon: yoga, price: [399, 1499]}
+      - {name: Badminton Racket, icon: badminton, price: [599, 2999]}
+      - {name: Football, icon: soccer, price: [399, 1499]}
+      - {name: Running Shoes, icon: shoe-sneaker, price: [1499, 4999]}
+      - {name: Dumbbell Set, icon: dumbbell, price: [999, 3999]}
+      - {name: Cycling Helmet, icon: racing-helmet, price: [799, 2499]}
+      - {name: Skipping Rope, icon: jump-rope, price: [199, 499]}
+    adjectives: [Pro, Training, Lightweight, Match, All-Weather, Junior]
+    price_range: [199, 8999]
+    cost_ratio_range: [0.45, 0.65]
+    lead_time_days: [5, 16]
+    season: [1.05, 1.00, 1.20, 1.30, 1.25, 0.95, 0.80, 0.85, 0.95, 1.00, 1.00, 1.10]
+    aspects: [grip, weight, durability, comfort, size, material]
+  - name: Books & Toys
+    slug: books-toys
+    blurb: "Recommended for ages 6 and above."
+    brands: [Kahani, Chhota Genius, Khilona, Pustak]
+    nouns:
+      - {name: Carrom Board, icon: checkerboard, price: [999, 2999]}
+      - {name: Ludo Set, icon: dice-5, price: [149, 499]}
+      - {name: Chess Set, icon: chess-knight, price: [299, 1499]}
+      - {name: Jigsaw Puzzle, icon: puzzle, price: [249, 899]}
+      - {name: Story Book Set, icon: book-open-page-variant, price: [299, 999]}
+      - {name: Colouring Kit, icon: palette, price: [199, 699]}
+      - {name: Wooden Toy Train, icon: train, price: [499, 1499]}
+      - {name: Science Kit, icon: flask, price: [599, 1999]}
+    adjectives: [Family, Classic, Junior, Deluxe, Illustrated, Wooden]
+    price_range: [149, 2999]
+    cost_ratio_range: [0.40, 0.60]
+    lead_time_days: [4, 14]
+    season: [0.90, 0.85, 0.90, 1.00, 1.25, 1.20, 0.95, 0.90, 0.95, 1.10, 1.25, 1.00]
+    aspects: [story, pieces, quality, instructions, illustrations, value]

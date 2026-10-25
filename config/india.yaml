@@ -1,0 +1,47 @@
+# Indian locale data used for synthetic customers, address validation and UI pick-lists.
+# Localities are real; each PIN code is the delivery PIN of that locality.
+country: India
+phone_country_code: "+91"
+# Valid Indian mobile numbers are 10 digits starting with 6, 7, 8 or 9
+mobile_first_digits: ["6", "7", "8", "9"]
+pin_code_pattern: "^[1-9][0-9]{5}$"
+mobile_pattern: "^(\\+91[\\- ]?)?[6-9][0-9]{4}[ ]?[0-9]{5}$"
+cities:
+  - {city: Mumbai, state: Maharashtra, localities: [[Andheri West, "400058"], [Bandra West, "400050"], [Powai, "400076"], [Dadar East, "400014"], [Borivali West, "400092"]]}
+  - {city: Pune, state: Maharashtra, localities: [[Kothrud, "411038"], [Viman Nagar, "411014"], [Aundh, "411007"]]}
+  - {city: Bengaluru, state: Karnataka, localities: [[Koramangala, "560034"], [Indiranagar, "560038"], [Whitefield, "560066"], [Jayanagar, "560011"], [HSR Layout, "560102"]]}
+  - {city: Chennai, state: Tamil Nadu, localities: [[T. Nagar, "600017"], [Adyar, "600020"], [Velachery, "600042"], [Anna Nagar, "600040"]]}
+  - {city: Coimbatore, state: Tamil Nadu, localities: [[R.S. Puram, "641002"]]}
+  - {city: Hyderabad, state: Telangana, localities: [[Banjara Hills, "500034"], [Gachibowli, "500032"], [Madhapur, "500081"]]}
+  - {city: New Delhi, state: Delhi, localities: [[Connaught Place, "110001"], [Lajpat Nagar, "110024"], [Saket, "110017"], [Dwarka Sector 6, "110075"]]}
+  - {city: Gurugram, state: Haryana, localities: [[DLF Phase 3, "122002"], [Sector 56, "122011"]]}
+  - {city: Noida, state: Uttar Pradesh, localities: [[Sector 62, "201309"]]}
+  - {city: Lucknow, state: Uttar Pradesh, localities: [[Gomti Nagar, "226010"], [Hazratganj, "226001"]]}
+  - {city: Kolkata, state: West Bengal, localities: [[Salt Lake Sector V, "700091"], [Park Street, "700016"]]}
+  - {city: Ahmedabad, state: Gujarat, localities: [[Navrangpura, "380009"], [Satellite, "380015"]]}
+  - {city: Jaipur, state: Rajasthan, localities: [[Malviya Nagar, "302017"], [Vaishali Nagar, "302021"]]}
+  - {city: Chandigarh, state: Chandigarh, localities: [[Sector 17, "160017"]]}
+  - {city: Indore, state: Madhya Pradesh, localities: [[Vijay Nagar, "452010"]]}
+  - {city: Bhubaneswar, state: Odisha, localities: [[Saheed Nagar, "751007"]]}
+  - {city: Kochi, state: Kerala, localities: [[Kakkanad, "682030"], [Edappally, "682024"]]}
+  - {city: Thiruvananthapuram, state: Kerala, localities: [[Pattom, "695004"]]}
+building_names: [Sai Krupa Apartments, Shanti Niketan, Green Park Residency, Gulmohar Heights, Lakshmi Nivas,
+                 Prestige Towers, Sunrise Enclave, Ashoka Residency, Shree Ganesh Society, Palm Grove,
+                 Kaveri Apartments, Neelkanth CHS, Royal Orchid, Vrindavan Villas, Silver Oak Residency]
+road_names: [MG Road, Station Road, Link Road, Main Road, 2nd Cross Road, 4th Main, Ring Road, Church Street,
+             Temple Road, Gandhi Marg, Nehru Road, 80 Feet Road]
+landmarks: [Near City Hospital, Opp. Metro Station, Behind Post Office, Near Central Mall, Opp. Public Park]
+states_and_union_territories: [Andhra Pradesh, Arunachal Pradesh, Assam, Bihar, Chhattisgarh, Goa, Gujarat,
+  Haryana, Himachal Pradesh, Jharkhand, Karnataka, Kerala, Madhya Pradesh, Maharashtra, Manipur, Meghalaya,
+  Mizoram, Nagaland, Odisha, Punjab, Rajasthan, Sikkim, Tamil Nadu, Telangana, Tripura, Uttar Pradesh,
+  Uttarakhand, West Bengal, Andaman and Nicobar Islands, Chandigarh, Dadra and Nagar Haveli and Daman and Diu,
+  Delhi, Jammu and Kashmir, Ladakh, Lakshadweep, Puducherry]
+# Common given names and surnames from across India, used for synthetic customers
+first_names: [Aarav, Aditi, Aditya, Akash, Ananya, Anjali, Arjun, Bhavna, Chetan, Deepa, Deepak, Divya, Farhan,
+              Gaurav, Harpreet, Ishaan, Kavya, Karthik, Lakshmi, Manish, Meera, Mohit, Neha, Nikhil, Pooja, Pradeep,
+              Priya, Rahul, Riya, Rohan, Sakshi, Sameer, Sanjana, Shreya, Siddharth, Simran, Sneha, Suresh, Tanvi,
+              Varun, Vikram, Zoya, Ayesha, Imran, Joseph, Anita, Ramesh, Kiran, Nandini, Arnav]
+last_names: [Sharma, Verma, Gupta, Iyer, Nair, Reddy, Patel, Shah, Mehta, Joshi, Kulkarni, Deshpande, Banerjee,
+             Chatterjee, Das, Sen, Singh, Kaur, Gill, Malhotra, Kapoor, Khan, Qureshi, Shaikh, Fernandes, D'Souza,
+             Menon, Pillai, Rao, Naidu, Krishnan, Subramanian, Agarwal, Bansal, Choudhary, Yadav, Mishra, Tiwari,
+             Pandey, Bhat]

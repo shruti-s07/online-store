@@ -1,0 +1,206 @@
+# Business rules and operational parameters. No value here is duplicated in code.
+
+currency: INR
+currency_symbol: "₹"
+money_decimal_places: 2
+# Display settings: Indian digit grouping (1,23,456) and dates like 21 Oct 2026
+locale:
+  digit_grouping: indian
+  date_format: "%d %b %Y"
+  datetime_format: "%d %b %Y, %H:%M"
+  time_zone: Asia/Kolkata
+  # Hide paise when an amount is a whole number of rupees
+  hide_zero_paise: true
+
+api:
+  page_size: 20
+  max_page_size: 200
+  # Upload limit for SnapCheck / photo search images
+  max_upload_mb: 8
+
+auth:
+  access_token_minutes: 30
+  refresh_token_days: 7
+  # Login attempts allowed per (IP, username) per window
+  login_rate: "5/min"
+  register_rate: "10/hour"
+  password_min_length: 8
+
+reservations:
+  # Minutes a checkout reservation holds stock
+  window_minutes: 15
+  # How often the background job releases expired reservations
+  cleanup_interval_seconds: 60
+
+inventory:
+  low_stock_threshold: 10
+  default_supplier_lead_time_days: 7
+
+checkout:
+  # Dotted paths resolved at runtime. Folder one ships safe stubs in backend.shared.hooks.
+  hooks:
+    apply_discounts: backend.folder_two_services.discounts.engine.apply_discounts
+    score_order: backend.folder_two_services.risk.scoring.score_order
+  payment_methods: [UPI, CARD, NETBANKING, COD]
+  prepaid_methods: [UPI, CARD, NETBANKING]
+  # Paid in cash at delivery (every method not listed as prepaid behaves like this)
+  cash_on_delivery_method: COD
+  payment_method_labels: {UPI: UPI, CARD: Credit or debit card, NETBANKING: Net banking, COD: Cash on delivery}
+  payment_method_hints: {UPI: "Google Pay, PhonePe, Paytm or any UPI app", CARD: "Visa, Mastercard, RuPay",
+                         NETBANKING: "All major Indian banks", COD: "Pay in cash when your order arrives"}
+
+payments:
+  # Simulated gateway. Outcomes are decided by the sandbox card token, like real sandboxes.
+  sandbox_tokens:
+    success: ["tok_visa", "tok_mastercard", "tok_rupay", "tok_upi", "tok_netbanking"]
+    declined: ["tok_declined"]
+    insufficient_funds: ["tok_insufficient"]
+  # Simulated network latency of the fake gateway (seconds)
+  latency_seconds: 0.0
+
+risk:
+  # 0..100 score thresholds
+  medium_threshold: 40
+  high_threshold: 70
+  otp_length: 6
+  otp_ttl_minutes: 10
+  otp_max_attempts: 3
+  # Rule-based fallback / baseline weights (points added to a 0..100 score) used only
+  # when the trained fraud model artifact is missing. Also reported as the baseline.
+  fallback_weights:
+    cod: 20
+    new_account: 20          # account younger than new_account_days
+    address_mismatch: 25
+    per_refused_delivery: 15
+    high_value: 10           # order total above high_value_amount
+  new_account_days: 14
+  high_value_amount: 15000
+  # Orders placed in [start, end) hours count as night orders (fraud feature)
+  night_hours: [0, 6]
+
+discounts:
+  # Never propose a price below cost * (1 + min_margin)
+  min_margin: 0.10
+  max_discount: 0.40
+  discount_step: 0.05
+  min_discount: 0.05
+  slow_mover:
+    min_stock: 25
+    min_days_of_cover: 120
+    # Forecast daily demand at or below this is "low"
+    max_daily_demand: 1.0
+  # Aim to bring days of cover down to this level
+  target_days_of_cover: 30
+  # Days before a past promotion used as its "normal demand" baseline
+  baseline_days: 28
+  # Used when no past promotion gives a usable estimate for a category
+  default_price_elasticity: 1.5
+  # Minimum number of past promotions needed to trust a category estimate
+  min_promotions_for_estimate: 2
+  suggestion_valid_days: 14
+  # Rules created by the seed command
+  seed_rules:
+    - name: "Welcome offer: 10% off above ₹999"
+      code: "WELCOME10"
+      conditions: {min_subtotal: 999}
+      action: {type: percent, value: 10}
+    - name: "₹200 off on 3 or more items above ₹2,499"
+      code: null
+      conditions: {min_subtotal: 2499, min_quantity: 3}
+      action: {type: fixed, value: 200}
+
+forecasting:
+  horizon_days: 21          # must stay within 14..30
+  min_horizon_days: 14
+  max_horizon_days: 30
+  backtest_days: 28
+  # Rolling-origin windows (each backtest_days long) used to pick the model per product
+  selection_windows: 3
+  moving_average_window: 7
+  seasonal_period: 7
+  # Days of history shown next to the forecast
+  history_tail_days: 56
+  # Products with fewer days of history use the moving average only
+  min_history_days: 60
+
+restock:
+  # safety stock = z * sigma_daily * sqrt(lead_time), floored at min_units
+  service_level_z: 1.65
+  safety_stock_min_units: 3
+  # Order enough to cover lead time + this review period after reaching the reorder point
+  review_period_days: 14
+
+segmentation:
+  n_clusters: 4
+  labels: [loyal, big_spenders, new, at_risk]
+
+recommendations:
+  top_k: 8
+  weights: {collaborative: 0.55, content: 0.30, popularity: 0.15}
+
+reviews:
+  fake:
+    # Score >= flag_threshold marks the review FLAGGED for moderation
+    flag_threshold: 0.5
+    weights:
+      unverified_purchase: 0.25
+      duplicate_text: 0.35
+      burst: 0.2
+      rating_sentiment_mismatch: 0.2
+      new_account: 0.15
+      short_extreme: 0.15
+    duplicate_similarity: 0.95
+    burst_window_hours: 24
+    burst_min_reviews: 4
+    new_account_days: 7
+    short_review_words: 6
+  summary_terms: 5
+  # An aspect is a "pro" / "con" when this share of its mentions is positive / negative
+  pros_min_positive_share: 0.6
+  cons_min_negative_share: 0.4
+
+snapcheck:
+  # Cosine similarity thresholds; calibrated values written by training override these
+  # (see ai/models/snapcheck_meta.json). These are used before calibration.
+  match_threshold: 0.80
+  mismatch_threshold: 0.60
+  photo_search_top_k: 8
+
+assistant:
+  max_tool_rounds: 5
+  # Actions that change data and therefore need an explicit confirm click
+  confirm_required_tools: [add_to_cart, cancel_order, remove_from_cart]
+  pending_action_ttl_minutes: 10
+  # Below this classifier probability the fallback asks the user to rephrase
+  min_intent_confidence: 0.35
+  search_result_limit: 6
+
+reports:
+  default_period: day
+  default_lookback_days: 30
+  top_n: 10
+  pdf_max_rows: 60
+
+jobs:
+  nightly_training_hour: 2
+  nightly_training_minute: 30
+  notification_interval_seconds: 30
+  low_stock_alert_hour: 7
+  discount_suggestion_hour: 3
+
+seed:
+  # Folder two adds its own data (reviews, promotions, discount rules) through these hooks,
+  # each called as fn(world, context) after the core data exists.
+  extensions:
+    - backend.folder_two_services.seeding.seed_services
+  # How seeded prepaid orders split across prepaid methods
+  prepaid_mix: {UPI: 0.6, CARD: 0.28, NETBANKING: 0.12}
+  # Days after placement at which seeded orders reach each status (status history timestamps)
+  status_step_days: {PAID: 0.01, CONFIRMED: 0.01, PROCESSING: 0.3, SHIPPED: 1.2, DELIVERED: 3.5,
+                     DELIVERY_REFUSED: 3.5, RETURN_REQUESTED: 6, RETURNED: 9, REFUNDED: 10, CANCELLED: 0.1}
+
+assistant_llm:
+  # Reasoning effort for the LLM path (low keeps chat latency/cost down)
+  effort: low
+  # Number of previous exchanges included as context
+  history_turns: 6

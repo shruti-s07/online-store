@@ -1,0 +1,37 @@
+# Vocabulary for synthetic review text. Sentiment of generated text follows the rating
+# (with label noise from ml.yaml). Used only by the data generators.
+review:
+  positive_adjectives: [excellent, great, fantastic, superb, solid, impressive, lovely, perfect, reliable, brilliant]
+  negative_adjectives: [poor, terrible, disappointing, flimsy, awful, cheap, faulty, weak, useless, bad]
+  positive_sentences:
+    - "Really happy with this purchase."
+    - "Would definitely buy again."
+    - "Works exactly as described."
+    - "Great value for the price."
+    - "Arrived quickly and well packed."
+    - "Exceeded my expectations."
+    - "Highly recommend it to friends."
+  negative_sentences:
+    - "Very disappointed with this purchase."
+    - "Would not buy again."
+    - "Not as described at all."
+    - "Waste of money."
+    - "Stopped working after a week."
+    - "Returned it immediately."
+    - "Do not recommend."
+  neutral_sentences:
+    - "It is okay for the price."
+    - "Does the job, nothing special."
+    - "Average overall."
+    - "Mixed feelings about this one."
+  positive_titles: ["Love it", "Great buy", "Five stars", "Very good", "Excellent quality"]
+  negative_titles: ["Disappointed", "Not worth it", "Poor quality", "Avoid", "Broke quickly"]
+  neutral_titles: ["It's okay", "Average", "Decent", "Mixed"]
+fake:
+  titles: ["BEST EVER", "Amazing!!!", "Must buy", "Perfect product", "WOW"]
+  bodies:
+    - "Best product ever!!! Highly recommend!!!"
+    - "Amazing amazing amazing, five stars!!"
+    - "Perfect perfect perfect. Buy it now!!!"
+    - "Best purchase ever, must buy!!!"
+    - "Wow best thing ever, 10/10!!!"

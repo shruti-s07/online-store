@@ -1,0 +1,154 @@
+# Synthetic-world parameters (used by the seed command) and model training settings.
+# Everything is seeded: same config => same data => same metrics.
+
+random_seed: 42
+
+synthetic:
+  n_customers: 600
+  products_per_category: 10
+  history_days: 540
+  # Expected orders per day before weekly/seasonal/festival/trend effects
+  base_orders_per_day: 45
+  yearly_trend: 0.10
+  # Gamma-Poisson over-dispersion of daily order counts (higher = less noise)
+  daily_noise_shape: 12.0
+  # Mon..Sun
+  weekly_profile: [0.92, 0.90, 0.95, 1.00, 1.10, 1.25, 1.18]
+  # Indian festive and sale calendar (approximate fixed dates; real dates move with the lunar calendar)
+  festivals:
+    - {name: "Republic Day Sale", month: 1, day: 24, days: 3, multiplier: 1.4}
+    - {name: "Holi", month: 3, day: 10, days: 4, multiplier: 1.3}
+    - {name: "Independence Day Sale", month: 8, day: 13, days: 3, multiplier: 1.6}
+    - {name: "Navratri and Dussehra", month: 10, day: 3, days: 9, multiplier: 1.5}
+    - {name: "Diwali", month: 10, day: 24, days: 7, multiplier: 2.2}
+    - {name: "Christmas and New Year", month: 12, day: 22, days: 10, multiplier: 1.4}
+  items_per_order_mean: 1.6
+  product_popularity_sigma: 0.8
+  # Customer segments (hidden ground truth). rate = relative order propensity while active.
+  segments:
+    loyal:        {share: 0.30, rate: 2.2, price_affinity: 0.0,  qty_mean: 1.2, cod_prob: 0.12, joined_days_ago: [200, 540]}
+    big_spenders: {share: 0.18, rate: 0.9, price_affinity: 1.6,  qty_mean: 1.9, cod_prob: 0.10, joined_days_ago: [150, 540]}
+    new:          {share: 0.20, rate: 1.4, price_affinity: 0.0,  qty_mean: 1.1, cod_prob: 0.30, joined_days_ago: [1, 60]}
+    at_risk:      {share: 0.32, rate: 1.6, price_affinity: 0.2,  qty_mean: 1.2, cod_prob: 0.20, joined_days_ago: [300, 540], churned_days_ago: [90, 220], rate_after_churn: 0.04}
+  # Each segment prefers some categories (multiplier on purchase probability)
+  segment_category_affinity:
+    loyal: {beauty: 1.6, home-kitchen: 1.3}
+    big_spenders: {electronics: 1.8, fashion: 1.3}
+    new: {fashion: 1.4, books-toys: 1.2}
+    at_risk: {sports-fitness: 1.4, books-toys: 1.3}
+  # Each customer's personal category taste ~ Dirichlet(concentration); lower = stronger favourites
+  customer_taste_concentration: 0.4
+  address_mismatch_prob: 0.08
+  night_order_prob: 0.07
+  # Hours [start, end) used for daytime orders (night hours come from business.yaml risk.night_hours)
+  day_hours: [8, 24]
+  fraudster_share: 0.04
+  fraudster: {cod_prob: 0.75, address_mismatch_prob: 0.7, night_order_prob: 0.35, joined_days_ago: [1, 45], rate: 1.5}
+  # Hidden fraud risk: logit = intercept + sum(w * feature) + N(0, noise_sd)
+  fraud_logit:
+    intercept: -4.3
+    cod: 1.5
+    log_account_age_days: -0.45
+    address_mismatch: 1.9
+    past_refused: 1.1
+    total_per_10k: 0.3
+    night_order: 0.8
+    noise_sd: 0.7
+  cancel_prob: 0.03
+  return_prob: 0.04
+  # Recent orders stay open (not yet delivered)
+  open_order_days: 5
+  promotions:
+    count: 36
+    duration_days: [5, 14]
+    discounts: [0.10, 0.15, 0.20, 0.25, 0.30]
+    # True price elasticity per category (uplift = (1 - discount) ** -elasticity)
+    elasticity:
+      electronics: 2.2
+      fashion: 2.8
+      home-kitchen: 1.6
+      sports-fitness: 1.9
+      beauty: 1.1
+      books-toys: 2.0
+    elasticity_noise_sd: 0.25
+    min_elasticity: 0.2
+    # No promotion starts in the first / ends in the last N days of history
+    edge_margin_days: [20, 20]
+  reviews:
+    review_prob: 0.15
+    quality_sd: 0.8
+    rating_noise_sd: 0.9
+    # rating = rating_base + quality_weight * product quality + noise, clipped to 1..5
+    rating_base: 3.7
+    quality_weight: 0.9
+    # Reviews are written this many days after the order
+    delay_days: [3, 20]
+    # Probability a review text carries the opposite sentiment of its rating
+    text_label_noise: 0.06
+    fake_campaigns: 8
+    fake_reviews_per_campaign: [4, 8]
+    # Campaigns happened between these many days ago; each burst lasts up to burst_hours
+    fake_campaign_days_ago: [5, 120]
+    fake_burst_hours: 20
+  # Stock on hand at the end of history: days of average demand
+  stock_days_range: [5, 75]
+  # Average demand over this many recent days sets the closing stock level
+  stock_reference_days: 60
+  # Floor on daily demand when sizing stock for products that rarely sell
+  min_daily_demand_for_stock: 0.2
+  # Overstocked products are drawn from the least popular (overstock_pool_factor x count) products
+  overstock_pool_factor: 2
+  # Fraction of products seeded deliberately overstocked (slow movers)
+  overstock_share: 0.15
+  overstock_days_range: [120, 300]
+  image_size: 160
+
+models:
+  test_size: 0.25
+  fraud:
+    # Candidates are compared on the last `validation_share` of the training period (by time);
+    # the best by average precision is refit and served.
+    candidates: [logistic_regression, gradient_boosting]
+    validation_share: 0.2
+    n_estimators: 200
+    max_depth: 3
+    learning_rate: 0.05
+    logistic_C: 1.0
+    # Staff can review this share of orders; precision is measured within that budget
+    review_budget: 0.05
+  sentiment:
+    ngram_max: 2
+    min_df: 2
+    C: 4.0
+  recommendations:
+    eval_k: 10
+    min_user_purchases: 3
+    content_max_features: 2000
+  forecasting:
+    ridge_alpha: 1.0
+    lags: [1, 7, 14]
+  segmentation:
+    n_init: 10
+    # Clusters are named greedily in this order: the cluster with the extreme centroid value
+    # (in standardised space) of `feature` gets `label`; the last label takes the remaining cluster.
+    # Quantile rules of the baseline segmentation
+    baseline_quantiles: {new_tenure: 0.2, at_risk_recency: 0.75, big_spender_aov: 0.85}
+    naming:
+      - {label: new, feature: tenure_days, pick: min}
+      - {label: at_risk, feature: recency_days, pick: max}
+      - {label: big_spenders, feature: avg_order_value, pick: max}
+      - {label: loyal, feature: null, pick: rest}
+  intents:
+    samples_per_intent: 120
+    C: 5.0
+  snapcheck:
+    eval_pairs: 400
+    # Thresholds are set so each error type (false MATCH, false MISMATCH) stays at or below this rate
+    target_error_rate: 0.01
+    # Relative weights of the fallback embedding blocks: colour, gradients, thumbnail
+    fallback_block_weights: [1.0, 0.8, 0.6]
+    augment:
+      rotate_degrees: 18
+      crop_fraction: 0.15
+      brightness_range: [0.75, 1.25]
+      noise_sd: 10

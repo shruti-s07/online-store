@@ -42,9 +42,14 @@ def _ensure_env() -> None:
 
 
 def _check_db() -> bool:
-    import psycopg
-
     from config.loader import env
+    db_engine = env("DB_ENGINE", "django.db.backends.postgresql")
+    if "sqlite" in db_engine:
+        db_name = env("DB_NAME", "online_store.sqlite3")
+        print(f"SQLite OK ({db_name})")
+        return True
+
+    import psycopg
     params = dict(dbname=env("DB_NAME"), user=env("DB_USER"), password=env("DB_PASSWORD"), host=env("DB_HOST"),
                   port=env("DB_PORT"), connect_timeout=env("DB_CONNECT_TIMEOUT", cast=int))
     try:
@@ -57,9 +62,10 @@ def _check_db() -> bool:
     except psycopg.OperationalError as exc:
         admin, admin_pw = env("DB_ADMIN_USER", ""), env("DB_ADMIN_PASSWORD", "")
         if not admin:
-            print(f"Cannot connect to PostgreSQL: {exc}\nStart PostgreSQL (docker compose up -d, or a local "
-                  "install) and check DB_* in .env. See README.md.")
-            return False
+            print(f"Note: PostgreSQL not reachable ({exc}). Falling back to local SQLite database.")
+            os.environ["DB_ENGINE"] = "django.db.backends.sqlite3"
+            os.environ["DB_NAME"] = "online_store.sqlite3"
+            return True
         print("Database not reachable as app user; creating role/database with DB_ADMIN_USER ...")
         from psycopg import sql
         with psycopg.connect(dbname="postgres", user=admin, password=admin_pw, host=params["host"],
