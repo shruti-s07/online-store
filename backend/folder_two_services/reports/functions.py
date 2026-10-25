@@ -7,6 +7,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import timedelta
+from decimal import Decimal
 from typing import Callable
 
 from django.db.models import Avg, Count, DecimalField, F, Max, Sum
@@ -40,7 +41,8 @@ def revenue_summary(days=None, **_):
     qs = Order.objects.filter(created_at__gte=_since(d), status__in=REVENUE)
     agg = qs.aggregate(revenue=Sum("total"), orders=Count("id"), aov=Avg("total"))
     units = OrderItem.objects.filter(order__in=qs).aggregate(u=Sum("quantity"))["u"] or 0
-    rows = [["Revenue", str(agg["revenue"] or 0)], ["Orders", agg["orders"]],
+    rev_str = f"{Decimal(str(agg['revenue'])):.2f}" if agg["revenue"] is not None else "0.00"
+    rows = [["Revenue", rev_str], ["Orders", agg["orders"]],
             ["Average order value", str(round(agg["aov"] or 0, 2))], ["Units sold", units]]
     return {"title": f"Revenue summary, last {d} days", "columns": ["Metric", "Value"], "rows": rows, "chart": None}
 
