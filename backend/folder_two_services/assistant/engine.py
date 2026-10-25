@@ -134,7 +134,32 @@ def _cell(column: str, value) -> str:
     return group_number(num) if num == int(num) else f"{num:,.1f}"
 
 
+
+def _get_context_product(user, channel: str):
+    """Retrieve the most recently discussed product from conversation history."""
+    from backend.folder_one_core.catalog.models import Product
+    recent = ChatMessage.objects.filter(user=user, channel=channel, role="assistant").order_by("-created_at")[:6]
+    for msg in recent:
+        meta = msg.meta or {}
+        if meta.get("last_product_id"):
+            p = Product.objects.filter(id=meta["last_product_id"]).first()
+            if p:
+                return p
+        if meta.get("product_ids"):
+            p = Product.objects.filter(id=meta["product_ids"][0]).first()
+            if p:
+                return p
+    return None
+
+
 def _local(user, channel: str, text: str) -> dict:
+    if channel == "assistant":
+        from .knowledge import get_faq_answer
+        faq = get_faq_answer(text)
+        if faq:
+            return {"engine": engine_name(), "intent": "store_info", "confidence": 1.0, "tool": None,
+                    "data": None, "pending_action": None, "reply": faq}
+
     intent, conf = nlu.classify(text, channel)
     if intent is None:
         raise DomainError("The assistant model has not been trained yet. Run: python store.py train",
@@ -162,6 +187,10 @@ def _local(user, channel: str, text: str) -> dict:
         args["query"] = text
     if tool.name in ("add_to_cart", "remove_from_cart"):
         product, candidates = nlu.match_product(text)
+        if product is None:
+            ctx_p = _get_context_product(user, channel)
+            if ctx_p and any(w in text.lower().split() for w in ("it", "this", "that", "item", "product", "cart", "basket", "buy", "add", "take", "one")):
+                product = ctx_p
         if product is None:
             out["reply"] = ("Which product do you mean? " + ", ".join(p.name for p in candidates)
                             if candidates else "I couldn't tell which product you mean. Try its name.")
@@ -192,6 +221,12 @@ def _local(user, channel: str, text: str) -> dict:
         return out
     out["data"], out["args"] = data, args
     out["reply"] = _describe(tool.name, data)
+    if tool.name in ("search_products", "get_recommendations") and data.get("results"):
+        out["meta"] = {
+            "last_product_id": data["results"][0].get("product_id"),
+            "last_product_name": data["results"][0].get("name"),
+            "product_ids": [r.get("product_id") for r in data["results"] if r.get("product_id")]
+        }
     return out
 
 
@@ -270,6 +305,9 @@ def handle(user, channel: str, text: str) -> dict:
     else:
         out = _local(user, channel, text)
     ChatMessage.objects.create(user=user, channel=channel, role="user", content=text)
+    meta = {k: out.get(k) for k in ("engine", "intent", "tool")}
+    if "meta" in out and isinstance(out["meta"], dict):
+        meta.update(out["meta"])
     ChatMessage.objects.create(user=user, channel=channel, role="assistant", content=out["reply"],
-                               meta={k: out.get(k) for k in ("engine", "intent", "tool")})
+                               meta=meta)
     return out

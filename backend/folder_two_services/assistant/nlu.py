@@ -12,6 +12,13 @@ WORD_NUMBERS = {"one": 1, "a": 1, "an": 1, "two": 2, "three": 3, "four": 4, "fiv
 
 def classify(text: str, channel: str) -> tuple[str | None, float]:
     """Most likely intent among those offered on `channel`, with its (renormalised) probability."""
+    t = text.lower().strip()
+    if channel == "assistant":
+        if re.search(r"\b(?:add\b.*?\b(?:cart|bag|basket)\b|put\b.*?\b(?:cart|bag|basket)\b|buy\s+(?:it|this|that|now)\b)", t):
+            return "add_to_cart", 0.99
+        if re.search(r"\b(?:remove\b.*?\b(?:cart|bag|basket)\b|delete\b.*?\b(?:cart|bag|basket)\b|take\b.*?\bout of\b)", t):
+            return "remove_from_cart", 0.99
+
     bundle = load_artifact("intents")
     if bundle is None:
         return None, 0.0
