@@ -5,8 +5,8 @@ import uuid
 
 from PySide6.QtCore import QSize, Qt, QTimer
 from PySide6.QtWidgets import (QButtonGroup, QCheckBox, QComboBox, QDialog, QDoubleSpinBox, QFileDialog, QGridLayout,
-                               QHBoxLayout, QLineEdit, QRadioButton, QScrollArea, QSpinBox, QSplitter, QTabWidget,
-                               QVBoxLayout, QWidget)
+                               QHBoxLayout, QLineEdit, QRadioButton, QScrollArea, QSpinBox, QSplitter, QStackedWidget,
+                               QTabWidget, QVBoxLayout, QWidget)
 
 from backend.shared.formatting import format_date, format_datetime, group_number
 from backend.shared.payment_methods import is_prepaid
@@ -104,9 +104,16 @@ class CatalogPage(BasePage):
     def build(self):
         self.page_no = 1
         self.photo_results = None
-        self.actions.addWidget(button("Search by photo", None, None, self.photo_search))
-        row = QHBoxLayout()
+        self.last_catalog_title = self.title
+        self.photo_btn = button("Search by photo", None, None, self.photo_search)
+        self.actions.addWidget(self.photo_btn)
+
+        # Catalog Grid View
+        self.catalog_view = QWidget()
+        row = QHBoxLayout(self.catalog_view)
+        row.setContentsMargins(0, 0, 0, 0)
         row.setSpacing(24)
+
         # Filter rail
         rail_host = QWidget()
         rail_host.setFixedWidth(220)
@@ -154,6 +161,7 @@ class CatalogPage(BasePage):
             w.currentIndexChanged.connect(self.reload)
         self.in_stock.toggled.connect(self.reload)
         row.addWidget(rail_host, 0, Qt.AlignTop)
+
         # Results
         results = QVBoxLayout()
         results.setSpacing(12)
@@ -178,20 +186,34 @@ class CatalogPage(BasePage):
         pager.addWidget(self.next)
         results.addLayout(pager)
         row.addLayout(results, 1)
-        self.body_lay.addLayout(row, 1)
+
+        # In-window Product Detail View (No pop-up!)
+        self.detail_view = ProductDetailView(self, on_back=self.close_product)
+
+        # Stacked container for seamless switching between catalog grid and detail view
+        self.stack = QStackedWidget()
+        self.stack.addWidget(self.catalog_view)
+        self.stack.addWidget(self.detail_view)
+        self.body_lay.addWidget(self.stack, 1)
         self.categories_loaded = False
 
     def set_payload(self, payload):
+        if hasattr(self, "stack") and self.stack.currentWidget() == self.detail_view:
+            self.close_product()
         if isinstance(payload, dict) and "search" in payload:
             self.search.setText(payload["search"])
             self.photo_results = None
             self.page_no = 1
 
     def go(self, n):
+        if hasattr(self, "stack") and self.stack.currentWidget() == self.detail_view:
+            self.close_product()
         self.page_no = max(1, n)
         self.refresh()
 
     def reload(self):
+        if hasattr(self, "stack") and self.stack.currentWidget() == self.detail_view:
+            self.close_product()
         self.photo_results = None
         self.page_no = 1
         self.refresh()
@@ -224,7 +246,9 @@ class CatalogPage(BasePage):
         clear_layout(self.grid)
         if "photo" in data:
             res = data["photo"]
-            self.set_title("Similar to your photo")
+            title = "Similar to your photo"
+            self.set_title(title)
+            self.last_catalog_title = title
             self.banner.show_message("Closest matches to your photo.", "info")
             items = [{**r, "id": r["product_id"], "category_name": r["category"]} for r in res["results"]]
             extras = [f"{r['similarity']:.0%} visual match" for r in res["results"]]
@@ -239,8 +263,10 @@ class CatalogPage(BasePage):
             size = business()["api"]["page_size"]
             pages = max(1, -(-page["count"] // size))
             q = self.search.text().strip()
-            self.set_title(f"Results for “{q}”" if q else (self.category.currentText()
-                           if self.category.currentData() else "All products"))
+            title = f"Results for “{q}”" if q else (self.category.currentText()
+                           if self.category.currentData() else "All products")
+            self.set_title(title)
+            self.last_catalog_title = title
             start = (self.page_no - 1) * size + 1 if items else 0
             self.count_lbl.setText(f"Showing {start}–{start + len(items) - 1 if items else 0} of "
                                    f"{group_number(page['count'])}")
@@ -253,7 +279,17 @@ class CatalogPage(BasePage):
                                             extra), i // cols, i % cols)
 
     def open_product(self, p):
-        ProductDialog(self, p["id"]).exec()
+        self.last_catalog_title = self.title_lbl.text()
+        self.photo_btn.setVisible(False)
+        self.set_title(p.get("name", "Product"))
+        self.detail_view.load_product(p["id"])
+        self.stack.setCurrentWidget(self.detail_view)
+
+    def close_product(self):
+        self.photo_btn.setVisible(True)
+        if hasattr(self, "last_catalog_title"):
+            self.set_title(self.last_catalog_title)
+        self.stack.setCurrentWidget(self.catalog_view)
 
     def photo_search(self):
         path, _ = QFileDialog.getOpenFileName(self, "Search by photo", "", IMAGE_FILTER)
@@ -269,23 +305,44 @@ class CatalogPage(BasePage):
         run_async(lambda: self.api.upload("search/photo/", path), done, self.state.show_error)
 
 
-class ProductDialog(QDialog):
-    def __init__(self, parent, product_id: int):
+class ProductDetailView(QWidget):
+    """Full-featured product detail view embedded directly inside the main application window."""
+
+    def __init__(self, parent=None, on_back=None):
         super().__init__(parent)
-        self.product_id = product_id
-        self.setWindowTitle("Product")
-        self.resize(1000, 760)
+        self.on_back = on_back
+        self.product_id = None
         lay = QVBoxLayout(self)
-        lay.setContentsMargins(24, 24, 24, 24)
+        lay.setContentsMargins(0, 0, 0, 0)
+        lay.setSpacing(12)
+
+        if on_back:
+            nav = QHBoxLayout()
+            self.back_btn = button("← Back to catalog", "secondary", None, on_back)
+            nav.addWidget(self.back_btn)
+            nav.addStretch()
+            lay.addLayout(nav)
+
         self.content = QWidget()
         self.cl = QVBoxLayout(self.content)
         self.cl.setContentsMargins(0, 0, 0, 0)
-        self.state = StatePane(self.content)
+        self.cl.setSpacing(16)
+
+        sc = QScrollArea()
+        sc.setWidgetResizable(True)
+        sc.setWidget(self.content)
+
+        self.state = StatePane(sc)
         self.state.retry.connect(self.load)
-        lay.addWidget(self.state)
+        lay.addWidget(self.state, 1)
+
+    def load_product(self, product_id: int):
+        self.product_id = product_id
         self.load()
 
     def load(self):
+        if not self.product_id:
+            return
         self.state.show_loading()
         api = ctx().api
 
@@ -304,7 +361,12 @@ class ProductDialog(QDialog):
         self.state.show_content()
         clear_layout(self.cl)
         p = d["p"]
-        self.setWindowTitle(p["name"])
+        parent_w = self.parent()
+        if isinstance(parent_w, QDialog):
+            parent_w.setWindowTitle(p["name"])
+        elif hasattr(parent_w, "set_title"):
+            parent_w.set_title(p["name"])
+
         top = QHBoxLayout()
         top.setSpacing(28)
         img = ImageLabel(QSize(340, 300))
@@ -448,11 +510,29 @@ class ProductDialog(QDialog):
             return w
         for s in d["similar"][:4]:
             c = ProductCard({**s, "id": s["product_id"], "category_name": ""},
-                            lambda p: ProductDialog(self, p["id"]).exec(),
-                            lambda p: add_to_cart(self, p["id"], 1, self.banner), s["reason"])
+                            lambda prod: self.load_product(prod["id"]),
+                            lambda prod: add_to_cart(self, prod["id"], 1, self.banner), s["reason"])
             lay.addWidget(c)
         lay.addStretch()
         return w
+
+
+class ProductDialog(QDialog):
+    """Compatibility dialog wrapper around ProductDetailView."""
+
+    def __init__(self, parent, product_id: int):
+        super().__init__(parent)
+        self.product_id = product_id
+        self.setWindowTitle("Product")
+        self.resize(1000, 760)
+        lay = QVBoxLayout(self)
+        lay.setContentsMargins(20, 20, 20, 20)
+        self.view = ProductDetailView(self)
+        lay.addWidget(self.view)
+        self.view.load_product(product_id)
+
+    def load(self):
+        self.view.load_product(self.product_id)
 
 
 # ============================================================================ cart & checkout

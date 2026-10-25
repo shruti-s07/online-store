@@ -100,3 +100,22 @@ def test_mock_mode_replays_recorded_fixtures(app, tmp_path, monkeypatch):
     with pytest.raises(api_client.ApiError) as e:
         c.get("orders/")
     assert e.value.code == "mock_missing"
+
+
+def test_catalog_in_window_product_navigation(app):
+    from ui.folder_a_shell.pages_customer import CatalogPage
+    cat = CatalogPage()
+    assert hasattr(cat, "stack")
+    assert hasattr(cat, "detail_view")
+    assert hasattr(cat, "catalog_view")
+    # Starts on the catalog grid
+    assert cat.stack.currentWidget() == cat.catalog_view
+    # Clicking a product opens the detail view in the SAME window without a popup dialog
+    cat.open_product({"id": 1, "name": "Wireless Noise Cancelling Headphones"})
+    assert cat.stack.currentWidget() == cat.detail_view
+    assert cat.photo_btn.isHidden()
+    # Clicking back returns smoothly to the catalog grid
+    cat.close_product()
+    assert cat.stack.currentWidget() == cat.catalog_view
+    assert not cat.photo_btn.isHidden()
+
