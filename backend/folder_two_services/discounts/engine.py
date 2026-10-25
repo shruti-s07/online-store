@@ -62,7 +62,10 @@ def _eligible_lines(rule: DiscountRule, cart: CartSnapshot):
 def times_used(rule_id: int) -> int:
     """Usage is derived from the discount snapshot stored on each order."""
     from backend.folder_one_core.orders.models import Order
-    return Order.objects.filter(discounts__contains=[{"rule_id": rule_id}]).exclude(status="CANCELLED").count()
+    from django.db import connection
+    if connection.vendor == "postgresql":
+        return Order.objects.filter(discounts__contains=[{"rule_id": rule_id}]).exclude(status="CANCELLED").count()
+    return Order.objects.filter(discounts__icontains=f'"rule_id": {rule_id}').exclude(status="CANCELLED").count()
 
 
 def _conditions_hold(rule: DiscountRule, cart: CartSnapshot) -> tuple[bool, str]:
